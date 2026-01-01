@@ -21,16 +21,23 @@ function render() {
 
     const value = board[row][col];
 
-    cell.textContent = value === 0 ? '' : value;
-    cell.className = 'field-cell';
+    
+    cell.classList.remove(
+      ...Array.from(cell.classList).filter(cls => cls.startsWith('field-cell--'))
+    );
 
+    // Add the new value-specific class if not zero
     if (value !== 0) {
       cell.classList.add(`field-cell--${value}`);
     }
+
+    // Update the text content
+    cell.textContent = value === 0 ? '' : value;
   });
 
   score.textContent = game.getScore();
 }
+
 
 startButton.addEventListener('click', () => {
   if (game.getStatus() === 'idle') {
