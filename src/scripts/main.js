@@ -2,44 +2,53 @@
 
 import Game from '../modules/Game.class.js';
 
+// ------------------------------
+// ELEMENTY DOM
+// ------------------------------
 const game = new Game();
 
 const startButton = document.querySelector('.button');
-const score = document.querySelector('.game-score');
+const scoreEl = document.querySelector('.game-score');
 const cells = document.querySelectorAll('.field-cell');
 
 const messageStart = document.querySelector('.message-start');
 const messageWin = document.querySelector('.message-win');
 const messageLose = document.querySelector('.message-lose');
 
+// ------------------------------
+// RENDER PLANSZY
+// ------------------------------
 function render() {
   const board = game.getState();
 
   cells.forEach((cell, index) => {
     const row = Math.floor(index / 4);
     const col = index % 4;
-
     const value = board[row][col];
 
-    
-    cell.classList.remove(
-      ...Array.from(cell.classList).filter(cls => cls.startsWith('field-cell--'))
-    );
+    // Usuń stare klasy wartości, zachowując field-cell
+    cell.classList.forEach((cls) => {
+      if (cls.startsWith('field-cell--')) {
+        cell.classList.remove(cls);
+      }
+    });
 
-    // Add the new value-specific class if not zero
+    // Dodaj klasę dla aktualnej wartości, jeśli nie jest 0
     if (value !== 0) {
       cell.classList.add(`field-cell--${value}`);
     }
 
-    // Update the text content
-    cell.textContent = value === 0 ? '' : value;
+    // Wyświetl wartość
+    cell.textContent = value || '';
   });
 
-  score.textContent = game.getScore();
+  scoreEl.textContent = game.getScore();
 }
 
-
-startButton.addEventListener('click', () => {
+// ------------------------------
+// START / RESTART GRY
+// ------------------------------
+function toggleGame() {
   if (game.getStatus() === 'idle') {
     game.start();
     messageStart.classList.add('hidden');
@@ -57,11 +66,20 @@ startButton.addEventListener('click', () => {
   }
 
   render();
-});
+}
 
+startButton.addEventListener('click', toggleGame);
+
+// ------------------------------
+// OBSŁUGA RUCHÓW STRZAŁKAMI
+// ------------------------------
 document.addEventListener('keydown', (e) => {
   if (game.getStatus() !== 'playing') {
     return;
+  }
+
+  if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+    e.preventDefault(); // zapobiega przewijaniu strony
   }
 
   switch (e.key) {
@@ -78,6 +96,7 @@ document.addEventListener('keydown', (e) => {
       game.moveDown();
       break;
   }
+
   render();
 
   if (game.getStatus() === 'win') {
@@ -88,3 +107,8 @@ document.addEventListener('keydown', (e) => {
     messageLose.classList.remove('hidden');
   }
 });
+
+// ------------------------------
+// POCZĄTKOWE RENDEROWANIE
+// ------------------------------
+render();
